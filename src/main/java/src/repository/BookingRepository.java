@@ -7,9 +7,9 @@ import java.sql.Date;
 import java.util.List;
 
 public interface BookingRepository {
-    Booking createBooking(Booking booking);
-    Booking updateBooking(Booking booking);
-    void deleteBooking(String id) throws BookingNotFoundException;
-    Booking getByBooking(String id) throws BookingNotFoundException;
-    List<Booking> getBookings(Date checkInFrom, Date checkInTo, Date checkOutFrom, Date checkOutTo);
+    Booking create(Booking booking);
+    Booking update(Booking booking);
+    void deleteBy(String id) throws BookingNotFoundException;
+    Booking getBy(String id) throws BookingNotFoundException;
+    List<Booking> getBookingsBy(Date checkInFrom, Date checkInTo, Date checkOutFrom, Date checkOutTo);
 }
