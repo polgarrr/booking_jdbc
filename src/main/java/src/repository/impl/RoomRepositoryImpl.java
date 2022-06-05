@@ -15,17 +15,17 @@ import java.util.List;
 public class RoomRepositoryImpl implements RoomRepository {
 
     @Override
-    public Room createRoom(Room room) {
+    public Room create(Room room) {
         try (Connection connection = getNewConnection()) {
-            String queryCreateR = "insert into booking.rooms (id, room_number, floor, room_type, description, price) values (?, ?, ?, ?, ?, ?)";
-            PreparedStatement statementCrtR = connection.prepareStatement(queryCreateR);
-            statementCrtR.setString(1, room.getId());
-            statementCrtR.setString(2, room.getRoomNumber());
-            statementCrtR.setInt(3, room.getFloor());
-            statementCrtR.setString(4, room.getRoomType());
-            statementCrtR.setString(5, room.getDescription());
-            statementCrtR.setInt(6, room.getPrice());
-            statementCrtR.execute();
+            String createRoomQuery = "insert into booking.rooms (id, room_number, floor, room_type, description, price) values (?, ?, ?, ?, ?, ?)";
+            PreparedStatement createRoomStatement = connection.prepareStatement(createRoomQuery);
+            createRoomStatement.setString(1, room.getId());
+            createRoomStatement.setString(2, room.getRoomNumber());
+            createRoomStatement.setInt(3, room.getFloor());
+            createRoomStatement.setString(4, room.getRoomType());
+            createRoomStatement.setString(5, room.getDescription());
+            createRoomStatement.setInt(6, room.getPrice());
+            createRoomStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new InternalServiceException(e.getMessage());
@@ -34,17 +34,17 @@ public class RoomRepositoryImpl implements RoomRepository {
     }
 
     @Override
-    public Room updateRoom(Room room) {
+    public Room update(Room room) {
         try (Connection connection = getNewConnection()) {
-            String queryUpdateR = "update booking.rooms set room_number = ?, floor = ?, room_type = ?, description = ?, price = ? where id = ?";
-            PreparedStatement statementUpdR = connection.prepareStatement(queryUpdateR);
-            statementUpdR.setString(1, room.getRoomNumber());
-            statementUpdR.setInt(2, room.getFloor());
-            statementUpdR.setString(3, room.getRoomType());
-            statementUpdR.setString(4, room.getDescription());
-            statementUpdR.setInt(5, room.getPrice());
-            statementUpdR.setString(6, room.getId());
-            statementUpdR.execute();
+            String updateRoomQuery = "update booking.rooms set room_number = ?, floor = ?, room_type = ?, description = ?, price = ? where id = ?";
+            PreparedStatement updateRoomStatement = connection.prepareStatement(updateRoomQuery);
+            updateRoomStatement.setString(1, room.getRoomNumber());
+            updateRoomStatement.setInt(2, room.getFloor());
+            updateRoomStatement.setString(3, room.getRoomType());
+            updateRoomStatement.setString(4, room.getDescription());
+            updateRoomStatement.setInt(5, room.getPrice());
+            updateRoomStatement.setString(6, room.getId());
+            updateRoomStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new InternalServiceException(e.getMessage());
@@ -54,13 +54,12 @@ public class RoomRepositoryImpl implements RoomRepository {
     }
 
     @Override
-    public void deleteRoom(String id) throws RoomNotFoundException {
+    public void deleteBy(String id) throws RoomNotFoundException {
         try (Connection connection = getNewConnection()) {
-            String queryDeleteR = "delete from booking.rooms where id = ?";
-            PreparedStatement statementDltR = connection.prepareStatement(queryDeleteR);
-            statementDltR.setString(1, id);
-            int i = statementDltR.executeUpdate(); // TODO: В случае если сущность не найдена (i==0) выкинуть UserNotFoundException.
-            if (i == 0) {
+            String deleteRoomQuery = "delete from booking.rooms where id = ?";
+            PreparedStatement deleteRoomStatement = connection.prepareStatement(deleteRoomQuery);
+            deleteRoomStatement.setString(1, id);
+            if (deleteRoomStatement.executeUpdate() == 0) {
                 throw new RoomNotFoundException(id);
             }
         } catch (SQLException e) {
@@ -70,33 +69,33 @@ public class RoomRepositoryImpl implements RoomRepository {
     }
 
     @Override
-    public Room getByRoom(String id) throws RoomNotFoundException {
+    public Room getBy(String id) throws RoomNotFoundException {
         try (Connection connection = getNewConnection()) {
-            String queryGetByR = "select b.id booking_id, check_in, check_out, room_id, room_number, floor, room_type, description, price, user_id, phone, email, first_name, last_name, middle_name from booking.bookings b inner join booking.rooms r on r.id = b.room_id inner join booking.users u on u.id = b.user_id where b.room_id = ?";
-            PreparedStatement statementGetByR = connection.prepareStatement(queryGetByR);
-            statementGetByR.setString(1, id);
-            ResultSet resultSetGetByR = statementGetByR.getResultSet();
+            String getRoomQuery = "select b.id booking_id, check_in, check_out, room_id, room_number, floor, room_type, description, price, user_id, phone, email, first_name, last_name, middle_name from booking.bookings b inner join booking.rooms r on r.id = b.room_id inner join booking.users u on u.id = b.user_id where b.room_id = ?";
+            PreparedStatement getRoomStatement = connection.prepareStatement(getRoomQuery);
+            getRoomStatement.setString(1, id);
+            ResultSet roomResultSet = getRoomStatement.getResultSet();
             List<Booking> bookings = new ArrayList<>();
             Room room = new Room();
-            if (resultSetGetByR == null || resultSetGetByR.getRow() == 0) {
+            if (roomResultSet == null || roomResultSet.getRow() == 0) {
                 throw new RoomNotFoundException(id);
             }
-            while (resultSetGetByR.next()) {
-                String bookingId = resultSetGetByR.getString("booking_id");
-                Date checkIn = resultSetGetByR.getDate("check_in");
-                Date checkOut = resultSetGetByR.getDate("check_out");
-                String roomId = resultSetGetByR.getString("room_id");
-                String roomNumber = resultSetGetByR.getString("room_number");
-                Integer floor = resultSetGetByR.getInt("floor");
-                String roomType = resultSetGetByR.getString("room_type");
-                String description = resultSetGetByR.getString("description");
-                Integer price = resultSetGetByR.getInt("price");
-                String userId = resultSetGetByR.getString("user_id");
-                String phone = resultSetGetByR.getString("phone");
-                String email = resultSetGetByR.getString("email");
-                String firstName = resultSetGetByR.getString("first_name");
-                String lastName = resultSetGetByR.getString("last_name");
-                String middleName = resultSetGetByR.getString("middle_name");
+            while (roomResultSet.next()) {
+                String bookingId = roomResultSet.getString("booking_id");
+                Date checkIn = roomResultSet.getDate("check_in");
+                Date checkOut = roomResultSet.getDate("check_out");
+                String roomId = roomResultSet.getString("room_id");
+                String roomNumber = roomResultSet.getString("room_number");
+                Integer floor = roomResultSet.getInt("floor");
+                String roomType = roomResultSet.getString("room_type");
+                String description = roomResultSet.getString("description");
+                Integer price = roomResultSet.getInt("price");
+                String userId = roomResultSet.getString("user_id");
+                String phone = roomResultSet.getString("phone");
+                String email = roomResultSet.getString("email");
+                String firstName = roomResultSet.getString("first_name");
+                String lastName = roomResultSet.getString("last_name");
+                String middleName = roomResultSet.getString("middle_name");
                 User user = new User(userId, phone, email, firstName, lastName, middleName, new ArrayList<>());
                 room = new Room(roomId, roomNumber, floor, roomType, description, price, new ArrayList<>());
                 Booking booking = new Booking(bookingId, checkIn, checkOut, user, room);
@@ -111,15 +110,15 @@ public class RoomRepositoryImpl implements RoomRepository {
     }
 
     @Override
-    public List<Room> getRooms(String roomNumber, Integer floor, String roomType, Integer price) {
+    public List<Room> getRoomsBy(String roomNumber, Integer floor, String roomType, Integer price) {
         try (Connection connection = getNewConnection()) {
-            String queryRoom = "select * from booking.rooms r where r.room_number = ? and r.floor = ? and r.room_type = ? and r.price = ?";
-            PreparedStatement statementRoom = connection.prepareStatement(queryRoom);
-            statementRoom.setString(1, roomNumber);
-            statementRoom.setInt(2, floor);
-            statementRoom.setString(3, roomType);
-            statementRoom.setInt(4, price);
-            ResultSet resultSet = statementRoom.getResultSet();
+            String getRoomsQuery = "select * from booking.rooms r where r.room_number = ? and r.floor = ? and r.room_type = ? and r.price = ?";
+            PreparedStatement getRoomsStatement = connection.prepareStatement(getRoomsQuery);
+            getRoomsStatement.setString(1, roomNumber);
+            getRoomsStatement.setInt(2, floor);
+            getRoomsStatement.setString(3, roomType);
+            getRoomsStatement.setInt(4, price);
+            ResultSet resultSet = getRoomsStatement.getResultSet();
             List<Room> rooms = new ArrayList<>();
             while (resultSet.next()) {
                 String roomId = resultSet.getString("id");

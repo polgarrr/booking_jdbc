@@ -16,15 +16,15 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User create(User user) {
         try (Connection connection = getNewConnection()) {
-            String queryCreateU = "insert into booking.users (id, phone, email, first_name, last_name, middle_name) values (?, ?, ?, ?, ?, ?)";
-            PreparedStatement statementCrtU = connection.prepareStatement(queryCreateU);
-            statementCrtU.setString(1, user.getId());
-            statementCrtU.setString(2, user.getPhone());
-            statementCrtU.setString(3, user.getEmail());
-            statementCrtU.setString(4, user.getFirstName());
-            statementCrtU.setString(5, user.getLastName());
-            statementCrtU.setString(6, user.getMiddleName());
-            statementCrtU.execute();
+            String createUserQuery = "insert into booking.users (id, phone, email, first_name, last_name, middle_name) values (?, ?, ?, ?, ?, ?)";
+            PreparedStatement createUserStatement = connection.prepareStatement(createUserQuery);
+            createUserStatement.setString(1, user.getId());
+            createUserStatement.setString(2, user.getPhone());
+            createUserStatement.setString(3, user.getEmail());
+            createUserStatement.setString(4, user.getFirstName());
+            createUserStatement.setString(5, user.getLastName());
+            createUserStatement.setString(6, user.getMiddleName());
+            createUserStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new InternalServiceException(e.getMessage());
@@ -35,15 +35,15 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User update(User user) {
         try (Connection connection = getNewConnection()) {
-            String queryUpdateU = "update booking.users set phone = ?, email = ?, first_name = ?, last_name = ?, middle_name = ? where id = ?";
-            PreparedStatement statementUpdU = connection.prepareStatement(queryUpdateU);
-            statementUpdU.setString(1, user.getPhone());
-            statementUpdU.setString(2, user.getEmail());
-            statementUpdU.setString(3, user.getFirstName());
-            statementUpdU.setString(4, user.getLastName());
-            statementUpdU.setString(5, user.getMiddleName());
-            statementUpdU.setString(6, user.getId());
-            statementUpdU.execute();
+            String updateUserQuery = "update booking.users set phone = ?, email = ?, first_name = ?, last_name = ?, middle_name = ? where id = ?";
+            PreparedStatement updateUserStatement = connection.prepareStatement(updateUserQuery);
+            updateUserStatement.setString(1, user.getPhone());
+            updateUserStatement.setString(2, user.getEmail());
+            updateUserStatement.setString(3, user.getFirstName());
+            updateUserStatement.setString(4, user.getLastName());
+            updateUserStatement.setString(5, user.getMiddleName());
+            updateUserStatement.setString(6, user.getId());
+            updateUserStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new InternalServiceException(e.getMessage());
@@ -52,15 +52,14 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public void delete(String id) throws UserNotFoundException {
+    public void deleteBy(String id) throws UserNotFoundException {
         try (Connection connection = getNewConnection()) {
-            String queryDeleteU = "delete from booking.users where id = ?";
-            PreparedStatement statementDltU = connection.prepareStatement(queryDeleteU);
-            statementDltU.setString(1, id);
-            int i = statementDltU.executeUpdate(); // TODO: В случае если сущность не найдена (i==0) выкинуть UserNotFoundException.
-            if (i == 0) {
+            String deleteUserQuery = "delete from booking.users where id = ?";
+            PreparedStatement deleteUserStatement = connection.prepareStatement(deleteUserQuery);
+            deleteUserStatement.setString(1, id);
+            if (deleteUserStatement.executeUpdate() == 0) {
                 throw new UserNotFoundException(id);
-            }
+            }; // TODO: В случае если сущность не найдена (i==0) выкинуть UserNotFoundException.
         } catch (SQLException e) {
             e.printStackTrace();
             throw new InternalServiceException(e.getMessage());
@@ -68,31 +67,31 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public User getUser(String id) throws UserNotFoundException {
+    public User getBy(String id) throws UserNotFoundException {
         try (Connection connection = getNewConnection()) {
-            String queryGetByU = "select b.id booking_id, check_in, check_out, room_id, room_number, floor, room_type, description, price, user_id, phone, email, first_name, last_name, middle_name from booking.bookings b inner join booking.rooms r on r.id = b.room_id inner join booking.users u on u.id = b.user_id where user_id = ?";
-            PreparedStatement statementGetByU = connection.prepareStatement(queryGetByU);
-            statementGetByU.setString(1, id);
-            ResultSet resultSetU = statementGetByU.getResultSet();
-            if (resultSetU == null || resultSetU.getRow() == 0) {
+            String getUserQuery = "select b.id booking_id, check_in, check_out, room_id, room_number, floor, room_type, description, price, user_id, phone, email, first_name, last_name, middle_name from booking.bookings b inner join booking.rooms r on r.id = b.room_id inner join booking.users u on u.id = b.user_id where user_id = ?";
+            PreparedStatement getUserStatement = connection.prepareStatement(getUserQuery);
+            getUserStatement.setString(1, id);
+            ResultSet userResultSet = getUserStatement.getResultSet();
+            if (userResultSet == null || userResultSet.getRow() == 0) {
                 throw new UserNotFoundException(id);
             }
-            while (resultSetU.next()) {
-                String bookingId = resultSetU.getString("booking_id");
-                Date checkIn = resultSetU.getDate("check_in");
-                Date checkOut = resultSetU.getDate("check_out");
-                String roomId = resultSetU.getString("room_id");
-                String roomNumber = resultSetU.getString("room_number");
-                Integer floor = resultSetU.getInt("floor");
-                String roomType = resultSetU.getString("room_type");
-                String description = resultSetU.getString("description");
-                Integer price = resultSetU.getInt("price");
-                String userId = resultSetU.getString("user_id");
-                String phone = resultSetU.getString("phone");
-                String email = resultSetU.getString("email");
-                String firstName = resultSetU.getString("first_name");
-                String lastName = resultSetU.getString("last_name");
-                String middleName = resultSetU.getString("middle_name");
+            while (userResultSet.next()) {
+                String bookingId = userResultSet.getString("booking_id");
+                Date checkIn = userResultSet.getDate("check_in");
+                Date checkOut = userResultSet.getDate("check_out");
+                String roomId = userResultSet.getString("room_id");
+                String roomNumber = userResultSet.getString("room_number");
+                Integer floor = userResultSet.getInt("floor");
+                String roomType = userResultSet.getString("room_type");
+                String description = userResultSet.getString("description");
+                Integer price = userResultSet.getInt("price");
+                String userId = userResultSet.getString("user_id");
+                String phone = userResultSet.getString("phone");
+                String email = userResultSet.getString("email");
+                String firstName = userResultSet.getString("first_name");
+                String lastName = userResultSet.getString("last_name");
+                String middleName = userResultSet.getString("middle_name");
                 User user = new User(userId, phone, email, firstName, lastName, middleName, new ArrayList<>());
                 Room room = new Room(roomId, roomNumber, floor, roomType, description, price, new ArrayList<>());
                 Booking booking = new Booking(bookingId, checkIn, checkOut, user, room);
@@ -107,7 +106,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<User> getUsers(String firstName, String lastName, String middleName) {
+    public List<User> getUsersBy(String firstName, String lastName, String middleName) {
         try (Connection connection = getNewConnection()) {
             String queryUsers = "select * from booking.users u where u.first_name = ? and u.last_name = ? and u.middle_name = ?";
             PreparedStatement statementUser = connection.prepareStatement(queryUsers);
